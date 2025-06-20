@@ -412,7 +412,6 @@
             <button class="tab" onclick="switchTab('queue')">🎫 Fila</button>
         </div>
 
-        <!-- Tab Usuários -->
         <div id="users-tab" class="tab-content active">
             <div class="form-section">
                 <h3>Cadastrar/Editar Usuário</h3>
@@ -455,7 +454,6 @@
             </div>
         </div>
 
-        <!-- Tab Fila -->
         <div id="queue-tab" class="tab-content">
             <div class="queue-section">
                 <h3>Fila de Atendimento</h3>
@@ -467,7 +465,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação -->
     <div id="confirmation-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -485,12 +482,10 @@
     <div id="messages"></div>
 
     <script>
-        // Configuração da API
-        const API_BASE_URL = 'http://localhost:3000'; // Configure aqui a URL da sua API
+        const API_BASE_URL = 'http://localhost:3000';
         let currentEditingId = null;
-        let currentTab = 'users'; // Controla qual aba está ativa
+        let currentTab = 'users';
 
-        // Utilitários
         function showMessage(message, type = 'success') {
             const messagesDiv = document.getElementById('messages');
             const messageDiv = document.createElement('div');
@@ -516,7 +511,6 @@
                        .replace(/(\d{4,5})(\d{4})$/, '$1-$2');
         }
 
-        // Eventos de formatação
         document.getElementById('cpf').addEventListener('input', function(e) {
             e.target.value = formatCPF(e.target.value);
         });
@@ -525,29 +519,22 @@
             e.target.value = formatPhone(e.target.value);
         });
 
-        // Controle de abas - OTIMIZADO
         function switchTab(tabName) {
-            // Remove active das abas
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            // Adiciona active na aba selecionada
             event.target.classList.add('active');
             document.getElementById(tabName + '-tab').classList.add('active');
             
-            // Atualiza a aba atual
             currentTab = tabName;
             
-            // Carrega dados APENAS da aba selecionada
             if (tabName === 'users') {
                 loadUsers();
             } else if (tabName === 'queue') {
-                // Só carrega a fila quando a aba for selecionada
                 loadQueue();
             }
         }
 
-        // Funções de API - Usuários
         async function loadUsers() {
             try {
                 const response = await fetch(`${API_BASE_URL}/users`);
@@ -659,7 +646,6 @@
             }
         }
 
-        // Funções de edição
         async function editUser(id) {
             const user = await getUserById(id);
             if (user) {
@@ -681,15 +667,13 @@
             document.getElementById('cancel-btn').style.display = 'none';
         }
 
-        // Funções de API - Fila
         async function loadQueue() {
             try {
-                // Mostra loading
                 document.getElementById('queue-list').innerHTML = '<div class="loading">Carregando fila...</div>';
                 
                 const response = await fetch(`${API_BASE_URL}/ticket/users-in-queue`);
-                const users = await response.json();
-                displayQueue(users);
+                const data = await response.json();
+                displayQueue(data.users || []);
             } catch (error) {
                 console.error('Erro ao carregar fila:', error);
                 document.getElementById('queue-list').innerHTML = '<div class="error">Erro ao carregar fila</div>';
@@ -728,7 +712,6 @@
                     const result = await response.json();
                     showMessage(result.message || 'Usuário adicionado à fila!');
                     
-                    // Só atualiza a fila se estivermos na aba de fila
                     if (currentTab === 'queue') {
                         loadQueue();
                     }
@@ -741,7 +724,6 @@
             }
         }
 
-        // Modal de confirmação
         function confirmDeleteUser(id, name) {
             document.getElementById('confirmation-message').textContent = 
                 `Tem certeza que deseja excluir o usuário "${name}"?`;
@@ -756,7 +738,6 @@
             document.getElementById('confirmation-modal').classList.remove('active');
         }
 
-        // Event Listeners
         document.getElementById('user-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -775,19 +756,14 @@
             }
         });
 
-        // Fechar modal ao clicar fora
         document.getElementById('confirmation-modal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
             }
         });
 
-        // Inicialização - OTIMIZADA
         document.addEventListener('DOMContentLoaded', function() {
-            // Só carrega os usuários na inicialização, já que a aba de usuários está ativa
             loadUsers();
-            
-            // A fila só será carregada quando o usuário clicar na aba de fila
         });
     </script>
 </body>

@@ -1,21 +1,21 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { ClientGrpc, ClientProxy } from '@nestjs/microservices';
-import { UserServiceClient } from './__interfaces__/user-service-client.interface';
-import { ReturnUser } from './__dtos__/return-user.dto';
-import { CreateUserDto } from './__dtos__/create-user.dto';
+import { ClientGrpc } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
+import { CreateUserDto } from './__dtos__/create-user.dto';
+import { ReturnUser } from './__dtos__/return-user.dto';
 import { UpdateUserDto } from './__dtos__/update-user.dto';
+import { UserServiceGrpc } from './__interfaces__/user-service-grpc.interface';
 
 @Injectable()
 export class UserService implements OnModuleInit {
-    private grpcService!: UserServiceClient;
+    private grpcService!: UserServiceGrpc;
 
     constructor(
         @Inject('USER_PACKAGE') private readonly client: ClientGrpc
     ) { }
 
     onModuleInit(): void {
-        this.grpcService = this.client.getService<UserServiceClient>('UserService');
+        this.grpcService = this.client.getService<UserServiceGrpc>('UserService');
     }
 
     findOne(id: string): Observable<ReturnUser> {

@@ -1,20 +1,24 @@
-import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
-import { map } from 'rxjs/operators';
+import { Inject, Injectable } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
+import { TicketServiceGrpc } from './__interfaces__/ticket-service-grpc.interface';
 import { Observable } from 'rxjs';
 import { ReturnUser } from 'src/user/__dtos__/return-user.dto';
 
 @Injectable()
 export class TicketService {
-    SERVER_API_URL = process.env.SERVER_API_URL;
+    private ticketService: TicketServiceGrpc;
 
-    constructor(private readonly http: HttpService) { }
+    constructor(@Inject('TICKET_PACKAGE') private client: ClientGrpc) { }
 
-    placeUserInQueue(id: string): Observable<{ message: string }> {
-        return this.http.post<{ message: string }>(`${this.SERVER_API_URL}/ticket/${id}`, {}).pipe(map((res) => res.data));
+    onModuleInit() {
+        this.ticketService = this.client.getService<TicketServiceGrpc>('TicketService');
     }
 
-    getUsersInQueue(): Observable<ReturnUser[]> {
-        return this.http.get<ReturnUser[]>(`${this.SERVER_API_URL}/ticket`).pipe(map((res) => res.data));
+    placeUserInQueue(id: string): Observable<{message: string}> {
+        return this.ticketService.PlaceUserInQueue({ id });
+    }
+
+    getUsersInQueue(): Observable<{ users: ReturnUser[] }> {
+        return this.ticketService.GetUsersInQueue({});
     }
 }
